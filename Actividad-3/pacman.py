@@ -1,19 +1,9 @@
-"""Pacman, classic arcade game.
-
-Exercises
-
-1. Change the board.
-2. Change the number of ghosts.
-3. Change where pacman starts.
-4. Make the ghosts faster/slower.
-5. Make the ghosts smarter.
-"""
-
 from random import choice
 from turtle import *
 
 from freegames import floor, vector
 
+# Estado inicial del juego
 state = {'score': 0}
 path = Turtle(visible=False)
 writer = Turtle(visible=False)
@@ -25,7 +15,8 @@ ghosts = [
     [vector(100, 160), vector(0, -5)],
     [vector(100, -160), vector(-5, 0)],
 ]
-# fmt: off
+
+# Tablero
 tiles = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
@@ -48,11 +39,9 @@ tiles = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ]
-# fmt: on
-
 
 def square(x, y):
-    """Draw square using path at (x, y)."""
+    """Dibuja un cuadrado en las coordenadas (x, y)."""
     path.up()
     path.goto(x, y)
     path.down()
@@ -64,17 +53,15 @@ def square(x, y):
 
     path.end_fill()
 
-
 def offset(point):
-    """Return offset of point in tiles."""
+    """Retorna el desplazamiento del punto en tiles."""
     x = (floor(point.x, 20) + 200) / 20
     y = (180 - floor(point.y, 20)) / 20
     index = int(x + y * 20)
     return index
 
-
 def valid(point):
-    """Return True if point is valid in tiles."""
+    """Retorna True si el punto es válido en los tiles."""
     index = offset(point)
 
     if tiles[index] == 0:
@@ -87,9 +74,8 @@ def valid(point):
 
     return point.x % 20 == 0 or point.y % 20 == 0
 
-
 def world():
-    """Draw world using path."""
+    """Dibuja el mundo usando el path."""
     bgcolor('black')
     path.color('blue')
 
@@ -106,9 +92,8 @@ def world():
                 path.goto(x + 10, y + 10)
                 path.dot(2, 'white')
 
-
 def move():
-    """Move pacman and all ghosts."""
+    """Mueve a Pacman y a todos los fantasmas."""
     writer.undo()
     writer.write(state['score'])
 
@@ -131,6 +116,16 @@ def move():
     dot(20, 'yellow')
 
     for point, course in ghosts:
+        # Movimiento inteligente de los fantasmas hacia Pacman
+        if abs(pacman - point) < 80:
+            if pacman.x > point.x:
+                course.x = 5
+            elif pacman.x < point.x:
+                course.x = -5
+            if pacman.y > point.y:
+                course.y = 5
+            elif pacman.y < point.y:
+                course.y = -5
         if valid(point + course):
             point.move(course)
         else:
@@ -154,15 +149,14 @@ def move():
         if abs(pacman - point) < 20:
             return
 
-    ontimer(move, 100)
-
+    # Aumentamos la velocidad de los fantasmas
+    ontimer(move, 75)
 
 def change(x, y):
-    """Change pacman aim if valid."""
+    """Cambia la dirección de Pacman si es válida."""
     if valid(pacman + vector(x, y)):
         aim.x = x
         aim.y = y
-
 
 setup(420, 420, 370, 0)
 hideturtle()
